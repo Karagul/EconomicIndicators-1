@@ -6,8 +6,7 @@
 ##########################################################################################################
 
 #devtools::install_github("sboysel/fredr")
-lib <- c("xts","hash","fredr","lubridate","Quandl","dplyr",
-         "xlsx","rjson","blsAPI","bea.R","censusapi")
+lib <- c("xts","hash","fredr","lubridate","Quandl","dplyr","rjson","blsAPI","bea.R","censusapi")
 lapply(lib, function(x){library(x, character.only = TRUE)})
 
 #
