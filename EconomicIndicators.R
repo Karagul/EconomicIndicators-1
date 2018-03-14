@@ -6,14 +6,15 @@
 ##########################################################################################################
 
 #devtools::install_github("sboysel/fredr")
-lib <- c("xts","hash","fredr","lubridate","Quandl","dplyr","rjson","blsAPI","bea.R","censusapi")
+lib <- c("xts","hash","fredr","lubridate","Quandl","dplyr",
+         "xlsx","rjson","blsAPI","bea.R","censusapi")
 lapply(lib, function(x){library(x, character.only = TRUE)})
 
 #
 # Constants/Default values
 #
 fred_api_key <- "6894fddc778cf3a7124a004b2c9d2a47"
-quandl_key <- "feCU42yte-VdVTvhpEdx"
+quandl_key <- "s93nYfvxTekwVsWS14e3"
 # census_api_key <- "7d2da2e64540a0a02dfc42792f538efcd9f7c570"
 # bea_api_key <- "DA5737E8-BE88-437B-A0B0-5E27DB6D2EF3"
 # bls_api_key <- "28931e969d654c04bed4c293b89964f8"
@@ -116,7 +117,7 @@ DownloadQuandlItem <- function(item, st_date){
   
   Quandl::Quandl.api_key(quandl_key)
   res <- Quandl(item, start_date = st_date)
-  res.val <- res[,grep("Index", colnames(res))]
+  res.val <- res[,2]
   res.xts <- xts(res.val, res$Date)  
   
   return(res.xts)
