@@ -12,11 +12,8 @@ lapply(lib, function(x){library(x, character.only = TRUE)})
 #
 # Constants/Default values
 #
-fred_api_key <- "6894fddc778cf3a7124a004b2c9d2a47"
-quandl_key <- "s93nYfvxTekwVsWS14e3"
-# census_api_key <- "7d2da2e64540a0a02dfc42792f538efcd9f7c570"
-# bea_api_key <- "DA5737E8-BE88-437B-A0B0-5E27DB6D2EF3"
-# bls_api_key <- "28931e969d654c04bed4c293b89964f8"
+
+# Key needed here. It came from webapp admin.
 
 mth.seq <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 qtr.seq <- c("Q1","Q1","Q1","Q2","Q2","Q2","Q3","Q3","Q3","Q4","Q4","Q4")
@@ -31,7 +28,7 @@ EconomicIndicators <- function(id = 1,
                                hist_startdate = NULL,
                                hist_enddate = NULL){
   
-  fredr_key(fred_api_key)
+  fredr::fredr_set_key(fred_api_key)
   res <- list(EI_instance_id = id,
               EI_fred_items = fred_items,
               EI_quandl_items = quandl_items,
@@ -63,12 +60,15 @@ EISetFredItems.EconomicIndicators <- function(ei, itm){
 #
 # Function download one item
 #}
-DownloadFredItem <- function(item, st_date, ed_date){
+DownloadFredItem <- function(key, item, st_date, ed_date){
   
-  res <- fredr_series(series_id = item,
-                    observation_start = st_date) %>%
-                    window(., start = st_date, end = ed_date)
+  # res <- fredr::fredr(series_id = "UNRATE", observation_start = st_date) %>%
+  #   window(., start = st_date, end = ed_date)
 
+  res <- fredr::fredr(series_id = item, observation_start = st_date, observation_end = ed_date) %>% 
+    dplyr::select(date, value)
+  res <- xts::xts(res$value, res$date)
+  colnames(res) <- key
   return(res)
 }
 
@@ -84,10 +84,10 @@ EIDownloadAllFredItems.EconomicIndicators <- function(ei){
   
   prelim.output <- NULL
   for(i in 1:length(dict_keys)){
-    res <- DownloadFredItem(ei$EI_fred_items[dict_keys[i]], st_date, ed_date)
+    res <- DownloadFredItem(dict_keys[i], ei$EI_fred_items[dict_keys[i]], st_date, ed_date)
     prelim.output <- merge.xts(prelim.output, res, all=c(TRUE, TRUE))
   }
-  colnames(prelim.output) <- dict_keys
+  #colnames(prelim.output) <- dict_keys
   
   ei$EI_fred_data <- prelim.output
   return(ei)
