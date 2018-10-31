@@ -65,9 +65,20 @@ DownloadFredItem <- function(key, item, st_date, ed_date){
   # res <- fredr::fredr(series_id = "UNRATE", observation_start = st_date) %>%
   #   window(., start = st_date, end = ed_date)
 
-  res <- fredr::fredr(series_id = item, observation_start = st_date, observation_end = ed_date) %>% 
-    dplyr::select(date, value)
-  res <- xts::xts(res$value, res$date)
+  res <- fredr::fredr(
+    series_id = item, 
+    observation_start = st_date, 
+    observation_end = ed_date
+  ) 
+  
+  if(nrow(res) == 0 | is.null(res) | is.vector(res)){
+    dates <- seq(from = st_date, to = ed_date, by = "month")
+    values <- rep(0, length(dates))
+    res <- xts::xts(values, dates)
+  } else {
+    res <- xts::xts(res$value, res$date)
+  }
+  
   colnames(res) <- key
   return(res)
 }
@@ -84,6 +95,7 @@ EIDownloadAllFredItems.EconomicIndicators <- function(ei){
   
   prelim.output <- NULL
   for(i in 1:length(dict_keys)){
+    print(i)
     res <- DownloadFredItem(dict_keys[i], ei$EI_fred_items[dict_keys[i]], st_date, ed_date)
     prelim.output <- merge.xts(prelim.output, res, all=c(TRUE, TRUE))
   }
